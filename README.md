@@ -7,13 +7,9 @@ Developed with Claude because something in HomeAssistant changed and beepbasket 
 1. Copy `custom_components/barcode_shopping` into your HA `config/custom_components/` (or add this repo to HACS as a custom repository).
 2. Make sure the **Shopping List** integration is set up.
 3. Restart HA, then Settings > Devices & services > Add integration > **Barcode Shopping**.
-4. Hard-refresh your browser. Add the card:
+4. Hard-refresh your browser. 
+5. Add the card using the picker. Tick the box to use a free lookup service (limited to 100 requests per day)
 
-```yaml
-type: custom:barcode-shopping-card
-title: Scan to shopping list
-auto_add: false   # true = add found items instantly and keep scanning
-```
 
 ## Lookup order
 1. Names you saved yourself (unknown barcodes you typed a name for)
@@ -28,4 +24,4 @@ auto_add: false   # true = add found items instantly and keep scanning
 `barcode_shopping.add` with `barcode`, optional `name`, optional `remember`.
 
 ## Initial Release
-Tested on Android / HomeAssistant 2026.10.1
+Tested on Android / HomeAssistant 2026.10.4
