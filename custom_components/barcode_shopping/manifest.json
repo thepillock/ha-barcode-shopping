@@ -1,0 +1,13 @@
+{
+  "domain": "barcode_shopping",
+  "name": "Barcode Shopping",
+  "codeowners": [@thepillock],
+  "config_flow": true,
+  "dependencies": ["http", "websocket_api", "frontend", "shopping_list"],
+  "documentation": "https://github.com/thepillock/ha-barcode-shopping",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/thepillock/ha-barcode-shopping/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

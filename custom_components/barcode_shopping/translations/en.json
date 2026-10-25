@@ -1,0 +1,30 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Barcode Shopping",
+        "description": "Open Food, Products, Beauty and Pet Food Facts are always searched. UPCitemdb is an optional extra for general products.",
+        "data": { "use_upcitemdb": "Also search UPCitemdb (free tier, about 100 lookups a day)" }
+      }
+    },
+    "abort": { "already_configured": "Barcode Shopping is already set up." }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": { "use_upcitemdb": "Also search UPCitemdb (free tier, about 100 lookups a day)" }
+      }
+    }
+  },
+  "services": {
+    "add": {
+      "name": "Add scanned item",
+      "description": "Looks up a barcode (unless a name is given) and adds the product to the shopping list.",
+      "fields": {
+        "barcode": { "name": "Barcode", "description": "EAN or UPC digits." },
+        "name": { "name": "Name", "description": "Use this name instead of looking the barcode up." },
+        "remember": { "name": "Remember", "description": "Save this name for the barcode so future scans use it." }
+      }
+    }
+  }
+}

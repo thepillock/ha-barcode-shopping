@@ -1,0 +1,15 @@
+add:
+  fields:
+    barcode:
+      required: true
+      example: "5449000000996"
+      selector:
+        text:
+    name:
+      example: "Coca-Cola 330 ml"
+      selector:
+        text:
+    remember:
+      default: false
+      selector:
+        boolean:
