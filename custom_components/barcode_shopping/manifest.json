@@ -1,7 +1,7 @@
 {
   "domain": "barcode_shopping",
   "name": "Barcode Shopping",
-  "codeowners": [@thepillock],
+  "codeowners": ["@thepillock"],
   "config_flow": true,
   "dependencies": ["http", "websocket_api", "frontend", "shopping_list"],
   "documentation": "https://github.com/thepillock/ha-barcode-shopping",
