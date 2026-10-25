@@ -1,6 +1,7 @@
 # Barcode Shopping for Home Assistant
 
 Scan a barcode with your phone camera, look the product up in free databases, and add it to the built-in Shopping List.
+Developed with Claude because something in HomeAssistant changed and beepbasket no longer works.
 
 ## Install
 1. Copy `custom_components/barcode_shopping` into your HA `config/custom_components/` (or add this repo to HACS as a custom repository).
@@ -25,3 +26,6 @@ auto_add: false   # true = add found items instantly and keep scanning
 
 ## Service (for automations, NFC tags, etc.)
 `barcode_shopping.add` with `barcode`, optional `name`, optional `remember`.
+
+## Initial Release
+Tested on Android / HomeAssistant 2026.10.1
