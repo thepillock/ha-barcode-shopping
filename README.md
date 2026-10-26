@@ -35,8 +35,10 @@ I decided a simple portrait dashboard with Barcode Shopping at the top and the s
 4. Open the dashboard you made
 5. Click "Start Camera"
 6. Scan something
-   - If the item is recognised (see Lookup Order in Notes, below) then it appears and you can click Add to Shopping List. This, as you may guess, adds it to your regular Home Assistant shopping list.
+   - If the item is recognised (see Lookup Order in Notes, below) then it appears and you can tap **Add to Shopping List**. This, as you may guess, adds it to your regular Home Assistant shopping list. If it was found in one of the online databases, an image will be displayed.
    - If the item is not recognised, it asks you to name it and will remember this for next time
+   - If you scan something but feel instant regret and don't want to add it, tap "Scan Again" - this discards the last item and reopens the camera.
+7. You can also type in the digits from a barcode if it won't scan for whatever reason
 
 
 ## Notes
