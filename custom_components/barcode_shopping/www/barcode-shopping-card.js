@@ -1,6 +1,7 @@
 const FORMATS = ["ean_13", "ean_8", "upc_a", "upc_e"];
 const ZXING_URL = "https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js";
 const MULTI_KEY = "barcode_shopping_multi_scan";
+const AUTO_KEY = "barcode_shopping_auto_add";
 const REPEAT_MS = 2500; // ignore the same barcode re-read right after resuming
 
 class BarcodeShoppingCard extends HTMLElement {
@@ -9,7 +10,9 @@ class BarcodeShoppingCard extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this._scanning = false; // camera is open
     this._paused = false;   // camera open but not reading (multi scan, waiting on you)
-    this._multi = false;
+    this._multi = false;    // reopen the camera after each item is added
+    this._auto = false;     // add found items without asking
+    this._viaCamera = false;
     this._res = null;
     this._code = null;
     this._lastCode = null;
@@ -28,12 +31,12 @@ class BarcodeShoppingCard extends HTMLElement {
   _$(sel) { return this.shadowRoot.querySelector(sel); }
   _msg(text) { this._$("#msg").textContent = text || ""; }
 
-  _loadMulti() {
+  _loadFlag(key, fallback) {
     try {
-      const v = localStorage.getItem(MULTI_KEY);
+      const v = localStorage.getItem(key);
       if (v !== null) return v === "1";
     } catch (_) { /* storage unavailable */ }
-    return Boolean(this._config.multi_scan ?? this._config.auto_add);
+    return Boolean(fallback);
   }
 
   _render() {
@@ -50,6 +53,7 @@ class BarcodeShoppingCard extends HTMLElement {
         button.secondary { background: transparent; color: var(--primary-text-color); border-color: var(--divider-color); }
         #scan { flex: 1; }
         input[type="text"], input[type="search"], input:not([type]), #manual, #name { font: inherit; flex: 1; min-width: 0; padding: 10px; border: 1px solid var(--divider-color); border-radius: 8px; background: var(--card-background-color); color: var(--primary-text-color); }
+        .toggles { display: grid; gap: 10px; }
         .toggle { position: relative; display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
         .toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
         .track { position: relative; flex: none; width: 40px; height: 22px; border-radius: 11px; background: var(--disabled-text-color, #9e9e9e); transition: background .2s; }
@@ -68,11 +72,18 @@ class BarcodeShoppingCard extends HTMLElement {
       <ha-card>
         <div class="wrap">
           <div class="view" hidden><video playsinline muted></video><div class="reticle"></div></div>
-          <label class="toggle">
-            <input type="checkbox" id="multi">
-            <span class="track"></span>
-            <span><span>Multi scan</span><small>Keep the camera open to scan the next item</small></span>
-          </label>
+          <div class="toggles">
+            <label class="toggle">
+              <input type="checkbox" id="auto">
+              <span class="track"></span>
+              <span><span>Auto-add</span><small>Add found items without asking</small></span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" id="multi">
+              <span class="track"></span>
+              <span><span>Multi scan</span><small>Reopen the camera after each item is added</small></span>
+            </label>
+          </div>
           <div class="row"><button id="scan">Start camera</button></div>
           <div class="row">
             <input id="manual" inputmode="numeric" placeholder="Or type a barcode" enterkeyhint="search">
@@ -92,12 +103,15 @@ class BarcodeShoppingCard extends HTMLElement {
         </div>
       </ha-card>`;
     this._$("ha-card").header = this._config.title;
-    this._multi = this._loadMulti();
-    this._$("#multi").checked = this._multi;
-    this._$("#multi").onchange = (e) => {
-      this._multi = e.target.checked;
-      try { localStorage.setItem(MULTI_KEY, this._multi ? "1" : "0"); } catch (_) {}
-    };
+    this._auto = this._loadFlag(AUTO_KEY, this._config.auto_add);
+    this._multi = this._loadFlag(MULTI_KEY, this._config.multi_scan);
+    for (const [id, key, prop] of [["#auto", AUTO_KEY, "_auto"], ["#multi", MULTI_KEY, "_multi"]]) {
+      this._$(id).checked = this[prop];
+      this._$(id).onchange = (e) => {
+        this[prop] = e.target.checked;
+        try { localStorage.setItem(key, this[prop] ? "1" : "0"); } catch (_) {}
+      };
+    }
     this._$("#scan").onclick = () => (this._scanning ? this._stop() : this._start());
     this._$("#go").onclick = () => this._manual();
     this._$("#manual").onkeydown = (e) => { if (e.key === "Enter") this._manual(); };
@@ -113,7 +127,7 @@ class BarcodeShoppingCard extends HTMLElement {
     const v = this._$("#manual").value.trim();
     if (!v) return;
     this._$("#manual").value = "";
-    this._onCode(v);
+    this._onCode(v, false);
   }
 
   _pause() {
@@ -200,16 +214,19 @@ class BarcodeShoppingCard extends HTMLElement {
     }
   }
 
-  async _onCode(raw) {
+  async _onCode(raw, fromCamera = true) {
     const code = String(raw).replace(/\D/g, "");
-    if (this._scanning && this._multi) {
-      // Multi scan: keep the camera open, just stop reading until this item is dealt with.
+    if (fromCamera) {
       if (this._paused) return;
-      if (code === this._lastCode && Date.now() - this._lastTime < REPEAT_MS) return;
-      this._pause();
-    } else {
-      this._stop();
+      // ignore the item that was just added still being in view
+      if (this._multi && code === this._lastCode && Date.now() - this._lastTime < REPEAT_MS) return;
     }
+    this._viaCamera = fromCamera;
+    // Multi scan + Auto-add: keep the camera open and just pause reading.
+    // Otherwise close it while the lookup (and any confirmation) happens.
+    if (fromCamera && this._multi && this._auto) this._pause();
+    else this._stop();
+
     this._lastCode = code;
     this._lastTime = Date.now();
     navigator.vibrate?.(60);
@@ -222,10 +239,13 @@ class BarcodeShoppingCard extends HTMLElement {
       if (this._scanning) this._resume();
       return;
     }
-    if (this._res && this._config.auto_add) {
-      await this._add(this._res.name);
+    if (this._res && this._auto) {
+      const ok = await this._add(this._res.name);
+      if (!ok && this._scanning) this._resume();
       return;
     }
+    // Needs the user (confirm or type a name): hide the camera while they do it.
+    if (this._scanning) this._stop();
     this._showResult();
   }
 
@@ -255,9 +275,15 @@ class BarcodeShoppingCard extends HTMLElement {
       return false;
     }
     this._$("#result").hidden = true;
+    this._lastTime = Date.now();
     if (this._scanning) {
+      // camera was kept open (Multi scan + Auto-add)
       this._msg("Added “" + name + "”. Scan the next item.");
       this._resume();
+    } else if (this._multi && this._viaCamera) {
+      // camera was hidden while waiting: open it again
+      this._msg("Added “" + name + "”. Scan the next item.");
+      setTimeout(() => this._start(), 400);
     } else {
       this._msg("Added “" + name + "”.");
     }
