@@ -92,7 +92,7 @@ class BarcodeShoppingCard extends HTMLElement {
   async _start() {
     if (this._scanning) return;
     if (!navigator.mediaDevices?.getUserMedia) {
-      this._msg("Camera not available. Open Home Assistant over HTTPS or use the companion app.");
+      this._msg("Camera not available. Home Assistant must be loaded over HTTPS, in the companion app too. Check that your internal URL starts with https://.");
       return;
     }
     this._scanning = true;
