@@ -65,6 +65,7 @@ class BarcodeShoppingCard extends HTMLElement {
         #result { display: grid; gap: 12px; }
         .item { display: grid; grid-template-columns: 72px 1fr; gap: 12px; align-items: center; }
         .item.noimg { grid-template-columns: 1fr; }
+        #name { width: 100%; box-sizing: border-box; }
         .item img { width: 72px; height: 72px; object-fit: contain; border-radius: 8px; background: var(--secondary-background-color); }
         .meta { margin-top: 6px; color: var(--secondary-text-color); font-size: .9em; }
         #msg { min-height: 1.2em; color: var(--secondary-text-color); }
@@ -96,7 +97,7 @@ class BarcodeShoppingCard extends HTMLElement {
             </div>
             <div class="row">
               <button id="add" style="flex:1">Add to shopping list</button>
-              <button id="skip" class="secondary">Scan next</button>
+              <button id="skip" class="secondary">Rescan</button>
             </div>
           </div>
           <div id="msg" role="status"></div>
@@ -110,8 +111,10 @@ class BarcodeShoppingCard extends HTMLElement {
       this._$(id).onchange = (e) => {
         this[prop] = e.target.checked;
         try { localStorage.setItem(key, this[prop] ? "1" : "0"); } catch (_) {}
+        this._updateSkipLabel();
       };
     }
+    this._updateSkipLabel();
     this._$("#scan").onclick = () => (this._scanning ? this._stop() : this._start());
     this._$("#go").onclick = () => this._manual();
     this._$("#manual").onkeydown = (e) => { if (e.key === "Enter") this._manual(); };
@@ -121,6 +124,12 @@ class BarcodeShoppingCard extends HTMLElement {
       this._msg("");
       if (this._scanning) this._resume(); else this._start();
     };
+  }
+
+  _updateSkipLabel() {
+    const b = this._$("#skip");
+    b.textContent = this._multi ? "Skip" : "Rescan";
+    b.title = "Discard this item and scan again";
   }
 
   _manual() {
