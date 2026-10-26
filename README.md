@@ -40,6 +40,10 @@ I decided a simple portrait dashboard with Barcode Shopping at the top and the s
    - If you scan something but feel instant regret and don't want to add it, tap "Scan Again" - this discards the last item and reopens the camera.
 7. You can also type in the digits from a barcode if it won't scan for whatever reason
 
+###Multi scan
+
+Turn on Multi scan above the camera button and the camera stays open after each item is added, ready for the next one. With it off, the camera closes after each scan. While you confirm an item the camera pauses, and a barcode you just scanned is ignored for a couple of seconds so it isn't added twice by accident. The toggle remembers your choice on each device.
+
 
 ## Notes
 
