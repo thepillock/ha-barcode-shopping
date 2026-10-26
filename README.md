@@ -52,12 +52,28 @@ Turn on Multi scan above the camera button and the camera stays open after each 
 2. Open Food Facts, Open Products Facts, Open Beauty Facts, Open Pet Food Facts (free, no key)
 3. UPCitemdb free tier (optional, about 100 lookups/day)
 
-### Future Plans
-1. Perhaps be able to scan to different lists?
-2. Scan multiple times for quantity? Not sure how to represent this in the Shopping List
+### The camera needs HTTPS
+Browsers only give web pages camera access on a secure (HTTPS) page. **This applies to the Home Assistant companion app too.** If the app is using a plain `http://` address (common as the "internal URL" on a home network), you will see "Camera not available".
 
-### Camera requirements
-- Browsers only allow the camera over **HTTPS** (Nabu Casa, reverse proxy, etc.) or in the **HA companion app** (grant camera permission).
+- Open Home Assistant over an `https://` address (Nabu Casa, a reverse proxy, or a local certificate).
+- In the companion app, check Settings > Companion app > your server, and make sure the internal URL also starts with `https://`.
+- Chrome on Android uses the built-in barcode detector. Safari and iOS fall back to the ZXing library, loaded from jsDelivr, so the phone needs internet access.
+
+### YAML-mode dashboards
+The integration adds the card to your dashboard resources automatically, but only for dashboards you manage through the UI. If you use YAML mode (`lovelace: mode: yaml` in `configuration.yaml`), Home Assistant treats resources as read-only config, so add the resource yourself:
+
+```yaml
+lovelace:
+  mode: yaml
+  resources:
+    - url: /barcode_shopping/barcode-shopping-card.js
+      type: module
+```
+
+Restart Home Assistant afterwards. The card is also loaded through a fallback script injection, but that can arrive late, so the explicit resource is more reliable. YAML dashboards have no card picker, so add the card by hand with `type: custom:barcode-shopping-card`.
+
+### Android/iPhone Scanner
+
 - Chrome/Android uses the native BarcodeDetector. Safari/iOS falls back to ZXing, loaded from jsDelivr, so the phone needs internet.
 
 ### Service (for automations, NFC tags, etc.)
