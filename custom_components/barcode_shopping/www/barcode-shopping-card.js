@@ -58,7 +58,7 @@ class BarcodeShoppingCard extends HTMLElement {
             </div>
             <div class="row">
               <button id="add" style="flex:1">Add to shopping list</button>
-              <button id="skip" class="secondary">Scan next</button>
+              <button id="skip" class="secondary">Scan again</button>
             </div>
           </div>
           <div id="msg" role="status"></div>

@@ -84,7 +84,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     )
     integration = await async_get_integration(hass, DOMAIN)
     url = f"{CARD_URL}?v={integration.version}"
-    frontend.add_extra_js_url(hass, url)
+    # frontend.add_extra_js_url(hass, url)
 
     async def _register(hass: HomeAssistant) -> None:
         await _async_register_resource(hass, url)
